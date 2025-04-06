@@ -1,21 +1,42 @@
 import { createTheme } from '@mui/material/styles';
-import { red } from '@mui/material/colors';
+import { blue, pink } from '@mui/material/colors';
 
-// Create a theme instance.
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#556cd6',
+      main: blue[700],
     },
     secondary: {
-      main: '#19857b',
+      main: pink[500],
     },
-    error: {
-      main: red.A400,
+    background: {
+      default: '#f4f6f8', // Light grey background
     },
-    // Consider adding mode: 'light' or 'dark' if needed
   },
-  // Add other customizations like typography, components defaults etc.
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    h1: { fontSize: '2.5rem', fontWeight: 500 },
+    h2: { fontSize: '2rem', fontWeight: 500 },
+    // Add more custom typography if needed
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none', // No uppercase buttons
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8, // Slightly rounded cards
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)', // Subtle shadow
+        },
+      },
+    },
+    // Customize other components as needed
+  },
 });
 
 export default theme;

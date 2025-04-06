@@ -1,7 +1,29 @@
-/* Keep minimal styles, e.g., font imports */
-/* @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap'); */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
 body {
   margin: 0;
-  /* Let MUI's CssBaseline handle background and font-family */
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f4f6f8; /* Match MUI theme default */
+}
+
+/* Add other global base styles if necessary */
+
+/* Style for file input visually hidden */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+/* Style for drag-and-drop overlay */
+.drag-over {
+    border: 2px dashed #1976d2; /* Use primary color */
+    background-color: rgba(25, 118, 210, 0.1);
 }

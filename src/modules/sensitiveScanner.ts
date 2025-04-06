@@ -1,0 +1,61 @@
+// Basic Regex patterns for common secrets - THIS IS NOT EXHAUSTIVE OR FOOLPROOF!
+// Consider enhancing these or using more sophisticated detection libraries if needed.
+const patterns = {
+  AWS_ACCESS_KEY_ID: /AKIA[0-9A-Z]{16}/g,
+  AWS_SECRET_ACCESS_KEY: /(?<![A-Za-z0-9/+=])[A-Za-z0-9/+=]{40}(?![A-Za-z0-9/+=])/g, // Avoid base64 blocks
+  GENERIC_API_KEY: /([a|A][p|P][i|I])?_?[k|K][e|E][y|Y].*['|"]([a-zA-Z0-9-_.]{32,})['|"]/g, // key = "..." or key: "..."
+  GITHUB_TOKEN: /ghp_[a-zA-Z0-9]{36}/g, // GitHub Personal Access Token (New Format)
+  GITHUB_OAUTH: /gho_[a-zA-Z0-9]{36}/g,
+  GITHUB_USER_TO_SERVER: /ghu_[a-zA-Z0-9]{36}/g,
+  GITHUB_SERVER_TO_SERVER: /ghs_[a-zA-Z0-9]{36}/g,
+  SLACK_TOKEN: /(xox[pboa]r?-[0-9]{10,12}-[0-9]{10,12}-[0-9]{10,12}-[a-z0-9]{32})/g,
+  STRIPE_KEY: /sk_live_[0-9a-zA-Z]{24}/g, // Stripe Live Key
+  TWILIO_SID: /AC[a-zA-Z0-9]{32}/g,
+  TWILIO_AUTH_TOKEN: /SK[a-zA-Z0-9]{32}/g, // Can overlap with generic key, place carefully
+  // Potential Generic Secret (High entropy string often indicates a secret)
+  // This is prone to false positives, use with caution or refinement
+  // GENERIC_SECRET: /(?<![A-Za-z0-9/+=])([A-Za-z0-9/+_-]{20,})(?![A-Za-z0-9/+=])/g,
+};
+
+// Function to scan content and replace findings
+export function scanAndRedact(content: string, placeholder: string): { redactedContent: string; sensitiveFound: boolean } {
+  let redactedContent = content;
+  let sensitiveFound = false;
+
+  for (const [key, regex] of Object.entries(patterns)) {
+    // Use replace with a function to only set sensitiveFound if a match actually occurs
+    let matchOccurred = false;
+    redactedContent = redactedContent.replace(regex, (_) => {
+      matchOccurred = true;
+      // Construct a more specific placeholder if desired
+      // return `[REDACTED_${key}]`;
+      return placeholder; // Use the generic placeholder
+    });
+    if (matchOccurred) {
+      sensitiveFound = true;
+      console.log(`Sensitive pattern found: ${key}`);
+    }
+  }
+
+  return { redactedContent, sensitiveFound };
+}
+
+// Simple test cases
+/*
+const testContent = `
+const awsKey = "AKIAIOSFODNN7EXAMPLE"; // Should match
+const secret = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"; // Should match
+const apiKey = 'api_key: "shh_secret_1234567890abcdef1234567890abcdef"'; // Should match
+const github = "token ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZaBcDeFgHiJkL"; // Should match
+const slack = "xoxp-123456789012-123456789012-123456789012-abcdefghijklmnopqrstuvwxyz123456"; // Should match
+const stripe = "sk_live_abcdefghijklmnopqrstuvwxyz"; // Should match (length 24)
+const twilioSid = "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // Should match
+const twilioToken = "SKxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // Should match
+const normalString = "this_is_just_a_long_variable_name_but_not_a_key";
+const normalBase64 = "dGhpc2lzYXNhbXBsZW9mYmFzZTY0c3RyaW5nZm9ydGVzdGluZw=="; // Shouldn't match secret key
+`;
+
+const result = scanAndRedact(testContent, '[REDACTED]');
+console.log("Sensitive Found:", result.sensitiveFound);
+console.log("Redacted Content:\n", result.redactedContent);
+*/
