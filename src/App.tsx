@@ -121,7 +121,7 @@ function App() {
            <Typography variant="body2" color="textSecondary" align="center" sx={{ mt: 2 }}>
              CodeCleanse © {new Date().getFullYear()}. All processing is done client-side. No data is uploaded.
              {' | '}
-             <Link href="https://github.com/your-repo-link-here" target="_blank" rel="noopener noreferrer">GitHub</Link>
+             <Link href="https://github.com/enkosi-ventures/codecleanse" target="_blank" rel="noopener noreferrer">GitHub</Link>
            </Typography>
         </Grid>
       </Grid>
