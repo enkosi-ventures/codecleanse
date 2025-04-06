@@ -39,23 +39,3 @@ export function scanAndRedact(content: string, placeholder: string): { redactedC
 
   return { redactedContent, sensitiveFound };
 }
-
-// Simple test cases
-/*
-const testContent = `
-const awsKey = "AKIAIOSFODNN7EXAMPLE"; // Should match
-const secret = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"; // Should match
-const apiKey = 'api_key: "shh_secret_1234567890abcdef1234567890abcdef"'; // Should match
-const github = "token ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZaBcDeFgHiJkL"; // Should match
-const slack = "xoxp-123456789012-123456789012-123456789012-abcdefghijklmnopqrstuvwxyz123456"; // Should match
-const stripe = "sk_live_abcdefghijklmnopqrstuvwxyz"; // Should match (length 24)
-const twilioSid = "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // Should match
-const twilioToken = "SKxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // Should match
-const normalString = "this_is_just_a_long_variable_name_but_not_a_key";
-const normalBase64 = "dGhpc2lzYXNhbXBsZW9mYmFzZTY0c3RyaW5nZm9ydGVzdGluZw=="; // Shouldn't match secret key
-`;
-
-const result = scanAndRedact(testContent, '[REDACTED]');
-console.log("Sensitive Found:", result.sensitiveFound);
-console.log("Redacted Content:\n", result.redactedContent);
-*/

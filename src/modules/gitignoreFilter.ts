@@ -81,19 +81,3 @@ export function applyGitignoreRules(
   // Not matched by any positive pattern
   return { excluded: false, reason: '' };
 }
-
-// Simple test cases (can be moved to a proper .test.ts file)
-/*
-console.log(applyGitignoreRules('src/myfile.ts', ['src/'], true)); // { excluded: true, reason: 'Gitignore Rule' }
-console.log(applyGitignoreRules('myfile.ts', ['src/'], true));     // { excluded: false, reason: '' }
-console.log(applyGitignoreRules('node_modules/package/file.js', ['node_modules/'], true)); // { excluded: true, reason: 'Gitignore Rule' }
-console.log(applyGitignoreRules('.git/config', [], true));       // { excluded: true, reason: 'Standard Ignore (.git)' }
-console.log(applyGitignoreRules('dist/bundle.js', ['*.js', '!dist/bundle.js'], true)); // { excluded: false, reason: '' }
-console.log(applyGitignoreRules('logs/debug.log', ['logs/'], true)); // { excluded: true, reason: 'Gitignore Rule' }
-console.log(applyGitignoreRules('config.yaml', ['*.yaml'], true)); // { excluded: true, reason: 'Gitignore Rule' }
-console.log(applyGitignoreRules('src/config.yaml', ['*.yaml'], true)); // { excluded: true, reason: 'Gitignore Rule' } - micromatch default finds anywhere
-console.log(applyGitignoreRules('src/important.dat', ['*.dat', '!src/important.dat'], true)); // { excluded: false, reason: '' }
-console.log(applyGitignoreRules('a/b/c.dat', ['*.dat', '!src/important.dat'], true)); // { excluded: true, reason: 'Gitignore Rule' }
-console.log(applyGitignoreRules('rootfile.txt', ['/rootfile.txt'], true)); // Needs testing with micromatch root behavior
-console.log(applyGitignoreRules('src/rootfile.txt', ['/rootfile.txt'], true)); // Needs testing
-*/

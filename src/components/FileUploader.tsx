@@ -94,6 +94,7 @@ const FileUploader = ({
         multiple
         className="visually-hidden" // Hide the default input
         disabled={disabled}
+        data-testid="file-input"
       />
       <CloudUploadIcon sx={{ fontSize: 48, color: disabled ? 'grey.500' : 'primary.main', mb: 1 }} />
       <Typography variant="body1" color={disabled ? 'text.disabled' : 'text.primary'} sx={{ mb: 1 }}>

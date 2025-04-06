@@ -125,18 +125,3 @@ export function filterMediaBinaries(filePath: string, mimeType?: string): { excl
   console.warn(`File type uncertain for ${filePath} (ext: ${extension}, mime: ${mimeType}). Assuming text.`);
   return { excluded: false, reason: '', isText: true }; // Default to include as text if unsure
 }
-
-// Simple test cases
-/*
-console.log(filterMediaBinaries('src/image.png'));   // true (binary)
-console.log(filterMediaBinaries('src/index.js'));    // false (text)
-console.log(filterMediaBinaries('docs/document.pdf')); // true (binary)
-console.log(filterMediaBinaries('node_modules/lib/index.js')); // true (cache dir)
-console.log(filterMediaBinaries('archive.tar.gz')); // true (binary ext)
-console.log(filterMediaBinaries('README.md'));      // false (text)
-console.log(filterMediaBinaries('Makefile'));       // false (text - common nameless)
-console.log(filterMediaBinaries('unknown.xyz'));    // false (text - default assumption)
-console.log(filterMediaBinaries('.DS_Store'));      // true (binary ext)
-console.log(filterMediaBinaries('image.svg', 'image/svg+xml')); // false (text - exception for svg mime)
-console.log(filterMediaBinaries('data', 'application/octet-stream')); // true (binary mime)
-*/
