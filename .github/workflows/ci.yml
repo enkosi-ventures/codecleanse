@@ -1,0 +1,35 @@
+name: CodeCleanse CI
+
+on:
+  push:
+    branches: [ main ] # Or your main branch name
+  pull_request:
+    branches: [ main ] # Or your main branch name
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest # Use a standard Linux runner
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4 # Checks out your repository code
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18' # Specify your Node.js version (use LTS)
+        cache: 'npm' # Cache npm dependencies for faster builds
+
+    - name: Install dependencies
+      run: npm ci # Use 'ci' for clean, reproducible installs in CI
+
+    - name: Run linters
+      run: npm run lint # Assumes your lint script is configured
+
+    - name: Run tests
+      run: npm run test -- --run # Use '--run' to prevent Vitest watch mode in CI
+
+    - name: Run build
+      run: npm run build # Ensure the project builds successfully
+
+    # Optional: Add deployment step here if desired (e.g., deploy to GitHub Pages on merge to main)
