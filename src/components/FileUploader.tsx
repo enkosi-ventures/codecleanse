@@ -88,9 +88,9 @@ const FileUploader = ({
         type="file"
         ref={inputRef}
         onChange={onFileChange}
-        /* @ts-ignore because webkitdirectory is non-standard but widely supported */
+        /* @ts-expect-error because webkitdirectory is non-standard but widely supported */
         webkitdirectory=""
-        directory=""
+        // directory=""
         multiple
         className="visually-hidden" // Hide the default input
         disabled={disabled}

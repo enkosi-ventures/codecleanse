@@ -43,23 +43,33 @@ self.onmessage = async (event: MessageEvent<WorkerTask>) => {
 
       case 'EXPORT_TEXT':
         if ('processedData' in payload) {
-          const { blob, filename } = await createConcatenatedDocument(payload.processedData);
+          const { blob, filename } = createConcatenatedDocument(payload.processedData);
           self.postMessage({ type: 'EXPORT_COMPLETE', payload: { blob, filename } } as WorkerMessage);
         } else {
           throw new Error("Invalid payload for EXPORT_TEXT task.");
         }
         break;
 
-      default:
-        console.warn('Worker received unknown task type:', type);
-        throw new Error(`Unknown task type: ${type}`);
+      default: {
+        // console.warn('Worker received unknown task type:', type);
+        // throw new Error(`Unknown task type: ${type}`);
+        const exhaustiveCheck: never = type;
+        console.warn(`Worker received unhandled task type: ${JSON.stringify(exhaustiveCheck)}`);
+        throw new Error(`Unhandled task type encountered in worker.`);
+      }
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Worker Error:', error);
+    let errorMessage = 'An unknown error occurred in the worker';
+    if (error instanceof Error) {
+        errorMessage = error.message;
+    } else if (typeof error === 'string') {
+        errorMessage = error;
+    }
     // Send error back to the main thread
     self.postMessage({
       type: 'ERROR',
-      payload: { message: error.message || 'An unknown error occurred in the worker' }
+      payload: { message: errorMessage }
     } as WorkerMessage);
   }
 };

@@ -64,30 +64,35 @@ export function useFileProcessing(config: AppConfig) {
 
   useEffect(() => {
     // Handle analysis completion
-    const removeAnalysisHandler = onMessage('ANALYSIS_COMPLETE', (payload: AnalysisResult) => {
+    const removeAnalysisHandler = onMessage('ANALYSIS_COMPLETE', (payload: unknown) => {
+      const analysisPayload = payload as AnalysisResult;
       console.log("Analysis complete handler called");
-      setAnalysisResult(payload);
-      setState(payload.files.length > 0 ? 'ready_for_review' : 'idle'); // Go to review or back to idle if no files
+      setAnalysisResult(analysisPayload);
+      setState(analysisPayload.files.length > 0 ? 'ready_for_review' : 'idle'); // Go to review or back to idle if no files
       setProgress(0); // Reset progress for next stage
     });
 
     // Handle processing progress
-    const removeProgressHandler = onMessage('PROCESSING_PROGRESS', (payload: { progress: number; currentFile: string }) => {
-      setProgress(payload.progress);
+    const removeProgressHandler = onMessage('PROCESSING_PROGRESS', (payload: unknown) => {
+      const progressPayload = payload as { progress: number; currentFile: string };
+      setProgress(progressPayload.progress);
       // Optionally display payload.currentFile somewhere in the UI
     });
 
     // Handle processing completion
-    const removeProcessCompleteHandler = onMessage('PROCESSING_COMPLETE', (payload: ProcessedData) => {
-      setProcessedData(payload);
+    const removeProcessCompleteHandler = onMessage('PROCESSING_COMPLETE', (payload: unknown) => {
+      const processCompletePayload = payload as ProcessedData;
+      console.log("Processing complete handler called with payload:", processCompletePayload);
+      setProcessedData(processCompletePayload);
       setState('complete');
-      setProgress(100); // Ensure progress shows 100%
+      setProgress(100);
     });
 
     // Handle export completion
-    const removeExportCompleteHandler = onMessage('EXPORT_COMPLETE', (payload: { blob: Blob; filename: string }) => {
-      downloadBlob(payload.blob, payload.filename);
-      setState('complete'); // Return to complete state after export
+    const removeExportCompleteHandler = onMessage('EXPORT_COMPLETE', (payload: unknown) => {
+      const exportCompletePayload = payload as { blob: Blob; filename: string };
+      downloadBlob(exportCompletePayload.blob, exportCompletePayload.filename);
+      setState('complete');
     });
 
     // Handle generic worker errors
@@ -97,8 +102,9 @@ export function useFileProcessing(config: AppConfig) {
     });
 
     // Handle specific errors reported by worker logic
-    const removeSpecificErrorHandler = onMessage('ERROR', (payload: { message: string }) => {
-      setError(payload.message || 'An error occurred during processing.');
+    const removeSpecificErrorHandler = onMessage('ERROR', (payload: unknown) => {
+      const errorPayload = payload as { message: string };
+      setError(errorPayload.message || 'An error occurred during processing.');
       setState('error');
     });
 

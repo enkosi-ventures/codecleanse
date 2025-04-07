@@ -11,7 +11,7 @@ export function useWorkerManager() {
   const [workerError, setWorkerError] = useState<string | null>(null);
 
   // Store message handlers keyed by message type
-  const messageHandlersRef = useRef<Map<string, (payload: any) => void>>(new Map());
+  const messageHandlersRef = useRef<Map<string, (payload: unknown) => void>>(new Map());
   // Store error handlers
   const errorHandlersRef = useRef<Set<(error: string) => void>>(new Set());
 
@@ -84,7 +84,7 @@ export function useWorkerManager() {
   }, [isWorkerReady]);
 
   // Function to register message handlers
-  const onMessage = useCallback((type: string, handler: (payload: any) => void) => {
+  const onMessage = useCallback((type: string, handler: (payload: unknown) => void) => {
     messageHandlersRef.current.set(type, handler);
     // Return a cleanup function
     return () => {

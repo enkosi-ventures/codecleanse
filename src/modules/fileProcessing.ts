@@ -66,7 +66,6 @@ export async function analyzeFiles(files: File[], config: AppConfig): Promise<An
   const processableFiles: ProcessableFile[] = [];
   let filesToIncludeCount = 0;
   let filesToExcludeCount = 0;
-  let sensitiveDataFoundCount = 0;
 
   for (const file of files) {
     if (!file.webkitRelativePath) {
@@ -92,8 +91,6 @@ export async function analyzeFiles(files: File[], config: AppConfig): Promise<An
       excludeReason = typeReason;
     }
 
-    // Basic sensitive data check (only on text files for now, content read later if included)
-    let sensitiveDetected = false;
     // Full scanning deferred until the processing step to avoid reading all files upfront.
 
     processableFiles.push({
@@ -102,7 +99,7 @@ export async function analyzeFiles(files: File[], config: AppConfig): Promise<An
       relativePath,
       include,
       excludeReason: include ? undefined : excludeReason,
-      sensitiveDetected,
+      sensitiveDetected: false,
     });
 
     if (include) filesToIncludeCount++; else filesToExcludeCount++;
@@ -115,7 +112,7 @@ export async function analyzeFiles(files: File[], config: AppConfig): Promise<An
     totalSize,
     filesToIncludeCount,
     filesToExcludeCount,
-    sensitiveDataFoundCount, // This will be 0 after analysis, updated in processing
+    sensitiveDataFoundCount: 0,
     gitignoreRules,
     foundGitignore,
   };
@@ -219,7 +216,7 @@ export async function createZipArchive(processedData: ProcessedData): Promise<{ 
   return { blob, filename: 'codecleanse_export.zip' };
 }
 
-export async function createConcatenatedDocument(processedData: ProcessedData): Promise<{ blob: Blob, filename: string }> {
+export function createConcatenatedDocument(processedData: ProcessedData): { blob: Blob, filename: string } {
   console.log("Worker: Generating concatenated text document...");
   const blob = generateConcatenatedText(processedData.filesToExport);
   console.log("Worker: Concatenated text document generated.");
