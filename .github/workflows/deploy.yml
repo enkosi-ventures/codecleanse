@@ -1,0 +1,59 @@
+name: Deploy to GitHub Pages
+
+on:
+  # Allows manual triggering from the Actions tab
+  workflow_dispatch:
+    # Optional inputs (e.g., if you wanted to specify something at runtime)
+    # inputs:
+    #   version:
+    #     description: 'Optional version tag'
+    #     required: false
+    #     default: 'latest'
+
+# Define permissions needed for deployment action (adjust if needed)
+permissions:
+  contents: read
+  pages: write # Required for gh-pages deployment
+  id-token: write # Required for some deployment methods
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }} # Output the deployed URL
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application # Build the static assets
+        run: npm run build
+        # Ensure your build output goes to the 'dist' directory (default for Vite)
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload build directory
+          path: './dist' # Make sure this matches your Vite build.outDir
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4 # Official GitHub action
+        # No need to specify GITHUB_TOKEN, it uses the default
