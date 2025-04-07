@@ -48,7 +48,7 @@ function App() {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Typography variant="h4" component="h1" gutterBottom align="center">
-        CodeCleanse <Typography variant="caption" sx={{ verticalAlign: 'super' }}>MVP</Typography>
+        CodeCleanse
       </Typography>
       <Typography variant="subtitle1" gutterBottom align="center" sx={{ mb: 3 }}>
         Clean your code repositories for LLM submission securely in your browser.
@@ -144,7 +144,7 @@ function App() {
           <Typography variant="body2" color="textSecondary" align="center" sx={{ mt: 2 }}>
             CodeCleanse © {new Date().getFullYear()}. All processing is done client-side. No data is uploaded.
             {' | '}
-            <Link href="https://github.com/enkosi-ventures/codecleanse" target="_blank" rel="noopener noreferrer">GitHub</Link>
+            Fully Open Source <Link href="https://github.com/enkosi-ventures/codecleanse" target="_blank" rel="noopener noreferrer">@GitHub</Link>
           </Typography>
         </Grid>
       </Grid>

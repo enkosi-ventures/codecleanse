@@ -2,12 +2,82 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+    <title>CodeCleanse | Securely Clean & Prepare Code for LLM Submission</title>
+
+    <!-- Description: Used by search engines for snippets. Include keywords naturally. -->
+    <meta
+      name="description"
+      content="CodeCleanse securely cleans your code repositories by removing unwanted files (binaries, node_modules) and redacting sensitive data (API keys, secrets), preparing it for LLM submission. All processing is done client-side in your browser for maximum privacy."
+    />
+
+    <!-- Keywords (Less impact now, but can help): -->
+    <meta
+      name="keywords"
+      content="code cleaner, llm code prep, large language model, sensitive data removal, api key redaction, gitignore filter, client-side code tool, privacy, developer tool, secure code submission, node_modules removal, .git removal"
+    />
+
+    <!-- Author -->
+    <meta name="author" content="Enkosi Ventures" />
+
+    <!-- Control search engine indexing (index=allow, follow=follow links) -->
+    <meta name="robots" content="index, follow" />
+
+    <!-- Canonical URL: Point to the preferred version of the page -->
+    <link rel="canonical" href="https://enkosi-ventures.github.io/codecleanse/" />
+
+    <!-- ## Open Graph / Facebook Meta Tags (for social sharing) ## -->
+    <meta property="og:title" content="CodeCleanse | Securely Clean & Prepare Code for LLM Submission" />
+    <meta property="og:description" content="Securely prepare your code for LLMs by removing noise and redacting secrets, all client-side." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://enkosi-ventures.github.io/codecleanse/" />
+    <meta property="og:image" content="https://enkosi-ventures.github.io/codecleanse/og-image.png" />
+    <meta property="og:site_name" content="CodeCleanse" />
+
+    <!-- ## Twitter Card Meta Tags (for Twitter sharing) ## -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="CodeCleanse | Securely Clean & Prepare Code for LLM Submission" />
+    <meta name="twitter:description" content="Securely prepare your code for LLMs by removing noise and redacting secrets, all client-side." />
+    <meta name="twitter:image" content="https://enkosi-ventures.github.io/codecleanse/og-image.png" />
+    <meta name="twitter:url" content="https://enkosi-ventures.github.io/codecleanse/" />
+    <meta name="twitter:creator" content="@EnkosiVentures">
+    <meta name="twitter:site" content="@EnkosiVentures" />
+
+    <!-- ## Favicons and Touch Icons ## -->
+    <!-- Create these icon files and place them in your `public` directory -->
+    <link rel="icon" href="/favicon.ico" sizes="any" /> <!-- Standard favicon -->
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" /> <!-- Modern SVG favicon -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" /> <!-- iOS touch icon (e.g., 180x180px) -->
+
+    <!-- ## Web App Manifest (for PWA features, icons, theming) ## -->
+    <link rel="manifest" href="/site.webmanifest" /> <!-- Create this JSON file in `public` -->
+
+    <!-- ## Theme Color (for mobile browser UI) ## -->
+    <meta name="theme-color" content="#1976d2" />
+
+    <!-- ## Font Preloading/Preconnect (Optional Performance Boost) ## -->
+    <!-- Preconnect to Google Fonts if you load fonts directly -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Link to your actual font stylesheet is likely handled by CSS import -->
+
   </head>
   <body>
+    <!-- Root element for React application -->
     <div id="root"></div>
+
+    <!-- NoScript fallback message -->
+    <noscript>
+      <div style="padding: 20px; text-align: center; font-family: sans-serif; background-color: #ffdddd; border: 1px solid #ffaaaa;">
+        <h1>JavaScript Required</h1>
+        <p>CodeCleanse relies heavily on JavaScript to function.</p>
+        <p>Please enable JavaScript in your browser settings to use this application.</p>
+      </div>
+    </noscript>
+
+    <!-- Vite application entry point -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
