@@ -29,7 +29,5 @@ jobs:
     - name: Run tests
       run: npm run test -- --run # Use '--run' to prevent Vitest watch mode in CI
 
-    - name: Run build
+    - name: Build check
       run: npm run build # Ensure the project builds successfully
-
-    # Optional: Add deployment step here if desired (e.g., deploy to GitHub Pages on merge to main)
