@@ -5,6 +5,17 @@ import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
+
+  // Base define configuration (applies always)
+  const defineConf: Record<string, any> = {
+    'process.env.NODE_ENV': JSON.stringify(mode),
+  };
+
+  // Specific defines ONLY for production build
+  if (mode === 'production') {
+    defineConf['process.platform'] = JSON.stringify('browser');
+  }
+
   return {
     plugins: [react()],
     worker: {
@@ -18,9 +29,6 @@ export default defineConfig(({ mode }) => {
       // Optional: Enable CSS processing in tests if needed (e.g., for CSS Modules)
       // css: true,
     },
-    define: {
-      'process.env.NODE_ENV': JSON.stringify(mode),
-      'process.platform': JSON.stringify('browser'),
-    },
+    define: defineConf,
   }
 });
