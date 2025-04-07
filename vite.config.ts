@@ -9,6 +9,7 @@ export default defineConfig({
   worker: {
     format: 'es', // Ensures worker uses ES modules
   },
+  base: '/codecleanse/',
   test: {
     globals: true, // Use Vitest global APIs (describe, test, expect)
     environment: 'jsdom', // Simulate DOM environment

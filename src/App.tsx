@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -15,6 +16,8 @@ import ExportOptions from './components/ExportOptions';
 import AdBanner from './components/AdBanner';
 import { useFileProcessing } from './hooks/useFileProcessing';
 import { useConfiguration } from './hooks/useConfiguration';
+
+import { initGA, trackPageView } from './analytics';
 
 
 function App() {
@@ -36,6 +39,15 @@ function App() {
     resetState,
     updateFileOverrides,
   } = useFileProcessing(config);
+
+  useEffect(() => {
+    initGA();
+  }, []);
+
+  useEffect(() => {
+    trackPageView(location.pathname);
+
+  }, [location]);
 
   const isLoading = state === 'analyzing' || state === 'processing' || state === 'exporting';
 
