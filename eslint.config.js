@@ -89,7 +89,7 @@ export default tseslint.config(
       }
    },
 
-   // 5. Configuration for Web Workers (Keep as before)
+   // 5. Configuration for Web Workers
    {
     files: ['src/workers/**/*.worker.ts'],
     languageOptions: {
