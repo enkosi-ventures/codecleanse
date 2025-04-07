@@ -1,33 +1,25 @@
 import micromatch from 'micromatch';
 
-// Standard patterns to always ignore (like .git)
 const STANDARD_IGNORE_PATTERNS = [
-  '**/.git/**', // Ignore all contents within .git directories
-  '.git',       // Ignore the .git directory itself if at the root
+  '**/.git/**',
+  // '.git',
 ];
 
-// Function to apply gitignore rules. Returns true if the path should be excluded.
 export function applyGitignoreRules(
-  filePath: string,
+  filePath: string, // Assumed to be relative path from root, e.g., 'src/file.js'
   userRules: string[],
-  useGitignore: boolean // Flag to enable/disable user rules
+  useGitignore: boolean
 ): { excluded: boolean; reason: string } {
 
-  // Always check standard ignores first
-  if (micromatch.isMatch(filePath, STANDARD_IGNORE_PATTERNS)) {
+  const options = { dot: true };
+
+  if (micromatch.isMatch(filePath, STANDARD_IGNORE_PATTERNS, options)) { // Add dot:true for .git
     return { excluded: true, reason: 'Standard Ignore (.git)' };
   }
 
   if (!useGitignore || userRules.length === 0) {
-    return { excluded: false, reason: '' }; // No user rules to apply or disabled
+    return { excluded: false, reason: '' };
   }
-
-  // Gitignore matching logic:
-  // Micromatch needs patterns adjusted slightly from standard .gitignore:
-  // - `dir/` should match the directory and its contents: `dir/**`
-  // - `file.txt` should match anywhere: `**/file.txt` (micromatch default behavior)
-  // - `/file.txt` should match only at the root: `file.txt` (when matching against relative paths)
-  // - `!pattern` means negation.
 
   const patterns: string[] = [];
   const negatePatterns: string[] = [];
@@ -43,25 +35,44 @@ export function applyGitignoreRules(
       rule = rule.substring(1);
     }
 
-    // Handle directory matching (`dir/`)
+    // Trim whitespace which might affect patterns
+    rule = rule.trim();
+
+    // --- NEW: Track if rule is root-relative ---
+    let isRoot = false;
+    if (rule.startsWith('/')) {
+      isRoot = true;
+      // Remove the leading slash but preserve that it's a root-relative rule.
+      rule = rule.substring(1);
+    }
+
+    // ** Micromatch Pattern Adjustments **
+
+    // 1. Directory pattern: `foo/` should match `foo` and `foo/**`
     if (rule.endsWith('/')) {
-      rule = rule + '**'; // Match directory and contents
-    }
-    // Handle root matching (`/file`) - micromatch matches root if no '/' present
-    // If rule starts with '/', remove it for micromatch unless it's the only char
-    if (rule.startsWith('/') && rule.length > 1) {
-      // This is tricky. Micromatch default matches root if no slashes.
-      // If the gitignore rule WAS /foo/bar, we likely want to match exactly that path.
-      // Keep the leading slash for exact path matching from root? Micromatch might handle this okay.
-      // Let's test without modifying this first. If needed, remove leading slash for root matching.
-      // rule = rule.substring(1);
-    } else if (!rule.includes('/')) {
-      // If it's just `file.txt` or `*.log`, match anywhere
-      // This is micromatch's default, but explicit `**` can clarify intent.
-      // rule = '**/' + rule; // Let's rely on micromatch default for this.
+      // Remove trailing slash for base match
+      rule = rule.substring(0, rule.length - 1);
+      // Add both the directory name and its contents pattern
+      const dirPattern = rule;
+      const contentsPattern = `${rule}/**`;
+      if (isNegate) {
+        negatePatterns.push(dirPattern, contentsPattern);
+      } else {
+        patterns.push(dirPattern, contentsPattern);
+      }
+      return; // Handled the directory case, skip default push
     }
 
+    // 2. Default/Wildcard: For rules like `*.js` or `foo`
+    // If the rule does not contain a slash and is not root-relative,
+    // prepend '**/' so that it matches anywhere in the path.
+    if (!rule.includes('/') && !isRoot) {
+      rule = `**/${rule}`;
+    }
+    // Note: For root-relative patterns (isRoot === true) we leave the rule as-is,
+    // ensuring it only matches at the repository root.
 
+    // Push the (potentially modified) rule into the appropriate array.
     if (isNegate) {
       negatePatterns.push(rule);
     } else {
@@ -69,15 +80,14 @@ export function applyGitignoreRules(
     }
   });
 
-  // Check positive patterns first
-  if (micromatch.isMatch(filePath, patterns)) {
-    // Now check if a later negation rule overrides the match
-    if (micromatch.isMatch(filePath, negatePatterns)) {
+  // Check positive patterns first using micromatch
+  if (micromatch.isMatch(filePath, patterns, options)) {
+    // Check if a negation pattern overrides the positive match.
+    if (micromatch.isMatch(filePath, negatePatterns, options)) {
       return { excluded: false, reason: '' }; // Negated, so include
     }
     return { excluded: true, reason: 'Gitignore Rule' }; // Matched positive, not negated
   }
 
-  // Not matched by any positive pattern
   return { excluded: false, reason: '' };
 }

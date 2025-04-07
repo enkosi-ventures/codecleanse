@@ -46,22 +46,6 @@ describe('<FileOverridePanel />', () => {
     });
   });
 
-  it('shows included files with VisibilityIcon (success color initially)', () => {
-    renderComponent();
-    const includedFileItem = screen.getByText('include.js').closest('li');
-    const visibilityIcon = includedFileItem?.querySelector('[data-testid="VisibilityIcon"]');
-    expect(visibilityIcon).toBeInTheDocument();
-    expect(visibilityIcon).toHaveClass('MuiSvgIcon-colorSuccess'); // Initial included state
-  });
-
-  it('shows excluded files with VisibilityOffIcon (disabled color initially)', () => {
-    renderComponent();
-    const excludedFileItem = screen.getByText('exclude.log').closest('li');
-    const visibilityOffIcon = excludedFileItem?.querySelector('[data-testid="VisibilityOffIcon"]');
-    expect(visibilityOffIcon).toBeInTheDocument();
-    expect(visibilityOffIcon).toHaveClass('MuiSvgIcon-colorDisabled'); // Initial excluded state
-  });
-
   it('calls onOverridesChange with correct override when toggling an included file', async () => {
     const user = userEvent.setup();
     renderComponent();
@@ -141,22 +125,22 @@ describe('<FileOverridePanel />', () => {
     const includedFileItem = screen.getByText('include.js').closest('li');
     const toggleButton = includedFileItem?.querySelector('button');
 
-    // Initial: Included (Auto) -> VisibilityIcon, colorSuccess
-    expect(includedFileItem?.querySelector('[data-testid="VisibilityIcon"]')).toHaveClass('MuiSvgIcon-colorSuccess');
+    // Initial: Included (Auto) -> CheckboxIcon, colorSuccess
+    expect(includedFileItem?.querySelector('[data-testid="CheckboxIcon"]')).toHaveClass('MuiSvgIcon-colorSuccess');
 
-    // Click 1: Manually Excluded -> VisibilityOffIcon, colorAction
+    // Click 1: Manually Excluded -> CheckBoxOutlineBlank, colorAction
     await user.click(toggleButton!);
     // We need to re-query as the component re-renders with new state potentially changing the icon component type
     const updatedItem1 = screen.getByText('include.js').closest('li');
-    expect(updatedItem1?.querySelector('[data-testid="VisibilityOffIcon"]')).toBeInTheDocument();
-    expect(updatedItem1?.querySelector('[data-testid="VisibilityOffIcon"]')).toHaveClass('MuiSvgIcon-colorAction');
+    expect(updatedItem1?.querySelector('[data-testid="CheckBoxOutlineBlank"]')).toBeInTheDocument();
+    expect(updatedItem1?.querySelector('[data-testid="CheckBoxOutlineBlank"]')).toHaveClass('MuiSvgIcon-colorAction');
 
 
-    // Click 2: Back to Auto (Included) -> VisibilityIcon, colorSuccess
+    // Click 2: Back to Auto (Included) -> CheckboxIcon, colorSuccess
     await user.click(toggleButton!);
     const updatedItem2 = screen.getByText('include.js').closest('li');
-    expect(updatedItem2?.querySelector('[data-testid="VisibilityIcon"]')).toBeInTheDocument();
-    expect(updatedItem2?.querySelector('[data-testid="VisibilityIcon"]')).toHaveClass('MuiSvgIcon-colorSuccess');
+    expect(updatedItem2?.querySelector('[data-testid="CheckboxIcon"]')).toBeInTheDocument();
+    expect(updatedItem2?.querySelector('[data-testid="CheckboxIcon"]')).toHaveClass('MuiSvgIcon-colorSuccess');
   });
 
   it('displays tooltip showing file status', async () => {

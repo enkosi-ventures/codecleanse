@@ -9,23 +9,21 @@ import theme from './styles/theme'; // Import your theme
 import { ErrorBoundary } from 'react-error-boundary'; // Import ErrorBoundary
 
 // --- Mocking useWorkerManager ---
-let mockPostTask: ReturnType<typeof vi.fn>;
-let mockOnMessage: ReturnType<typeof vi.fn>;
-let mockOnError: ReturnType<typeof vi.fn>;
-let mockIsWorkerReady: boolean = true;
-let workerMessageHandlers: Map<string, (payload: any) => void>;
-let workerErrorHandlers: Set<(error: string) => void>;
+const workerMessageHandlers = new Map<string, (payload: any) => void>();
+const workerErrorHandlers = new Set<(error: string) => void>();
+
+const mockPostTask = vi.fn();
+const mockOnMessage = vi.fn((type: string, handler: (payload: any) => void) => {
+  workerMessageHandlers.set(type, handler);
+  return () => workerMessageHandlers.delete(type);
+});
+const mockOnError = vi.fn((handler: (error: string) => void) => {
+  workerErrorHandlers.add(handler);
+  return () => workerErrorHandlers.delete(handler);
+});
+const mockIsWorkerReady = true;
 
 vi.mock('./hooks/useWorkerManager', () => {
-  mockPostTask = vi.fn();
-  mockOnMessage = vi.fn((type, handler) => {
-    workerMessageHandlers.set(type, handler);
-    return () => workerMessageHandlers.delete(type);
-  });
-  mockOnError = vi.fn((handler) => {
-    workerErrorHandlers.add(handler);
-    return () => workerErrorHandlers.delete(handler);
-  });
   return {
     useWorkerManager: () => ({
       postTask: mockPostTask,
@@ -95,9 +93,9 @@ describe('<App /> Integration Test', () => {
     mockPostTask.mockClear();
     mockOnMessage.mockClear();
     mockOnError.mockClear();
-    workerMessageHandlers = new Map();
-    workerErrorHandlers = new Set();
-    mockIsWorkerReady = true;
+    workerMessageHandlers.clear();
+    workerErrorHandlers.clear();
+    // mockIsWorkerReady = true;
 
     // Mock globals used by hooks/components if necessary (like downloadBlob)
     globalThis.URL.createObjectURL = vi.fn(() => 'blob:mockurl');
@@ -109,17 +107,30 @@ describe('<App /> Integration Test', () => {
   });
   afterEach(() => {
     vi.restoreAllMocks();
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+      // Remove the container from the DOM if it exists.
+      const container = document.querySelector('div');
+      if (container && container.parentElement) {
+        container.parentElement.removeChild(container);
+      }
+    });
   });
 
 
   const renderApp = () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
     render(
       <ThemeProvider theme={theme}>
         <ErrorBoundary FallbackComponent={TestErrorFallback}>
           <App />
         </ErrorBoundary>
-      </ThemeProvider>
+      </ThemeProvider>,
+      { container }
     );
+    return container;
   };
 
   it('should perform a full workflow: Upload -> Analyze -> Override -> Process -> Export Zip', async () => {

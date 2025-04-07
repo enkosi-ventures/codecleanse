@@ -3,8 +3,8 @@ import { applyGitignoreRules } from './gitignoreFilter';
 
 describe('applyGitignoreRules', () => {
   const standardRules = ['node_modules/', '*.log', 'build/'];
-  const rulesWithNegation = ['*.js', '!src/important.js', 'dist/', '!dist/keep.txt'];
-  const rootRules = ['/config.yaml', 'dist/']; // `/config.yaml` should only match at root
+  const rulesWithNegation = ['*.js', '!src/important.js', 'dist/', '!dist/keep.txt', '.hidden/'];
+  const rootRules = ['/config.yaml', '/data/', 'dist/']; // `/config.yaml` should only match at root
 
   // --- Basic Cases ---
   it('should ignore files matching standard rules', () => {
@@ -25,22 +25,33 @@ describe('applyGitignoreRules', () => {
 
   // --- Negation ---
   it('should handle negation rules correctly', () => {
-    expect(applyGitignoreRules('test.js', rulesWithNegation, true).excluded).toBe(true); // Matches *.js
-    expect(applyGitignoreRules('src/other.js', rulesWithNegation, true).excluded).toBe(true); // Matches *.js
-    expect(applyGitignoreRules('src/important.js', rulesWithNegation, true).excluded).toBe(false); // Negated by !src/important.js
-    expect(applyGitignoreRules('dist/temp.txt', rulesWithNegation, true).excluded).toBe(true); // Matches dist/
-    expect(applyGitignoreRules('dist/keep.txt', rulesWithNegation, true).excluded).toBe(false); // Negated by !dist/keep.txt
-  });
+    // Micromatch default for *.js matches anywhere
+    expect(applyGitignoreRules('test.js', rulesWithNegation, true).excluded).toBe(true);
+    expect(applyGitignoreRules('src/other.js', rulesWithNegation, true).excluded).toBe(true); // *.js still matches
+    // Negation applies
+    expect(applyGitignoreRules('src/important.js', rulesWithNegation, true).excluded).toBe(false);
+    // Directory match
+    expect(applyGitignoreRules('dist/temp.txt', rulesWithNegation, true).excluded).toBe(true);
+    expect(applyGitignoreRules('dist/subdir/file', rulesWithNegation, true).excluded).toBe(true); // dist/**
+    // Directory negation
+    expect(applyGitignoreRules('dist/keep.txt', rulesWithNegation, true).excluded).toBe(false);
+
+     // Test hidden files matching directory pattern
+     expect(applyGitignoreRules('.hidden/file', rulesWithNegation, true).excluded).toBe(true);
+     expect(applyGitignoreRules('.hidden/', rulesWithNegation, true).excluded).toBe(true);
+});
 
   // --- Directory Matching ---
   it('should correctly match directories', () => {
-    const rules = ['logs/', 'temp/data/'];
+    const rules = ['logs/', 'temp/data/', '.metadata']; // Add a dotfile pattern
     expect(applyGitignoreRules('logs/error.log', rules, true).excluded).toBe(true);
     expect(applyGitignoreRules('logs/subdir/debug.log', rules, true).excluded).toBe(true);
     expect(applyGitignoreRules('temp/data/file.bin', rules, true).excluded).toBe(true);
+    expect(applyGitignoreRules('temp/data/', rules, true).excluded).toBe(true); // Match dir itself
     expect(applyGitignoreRules('temp/other/file', rules, true).excluded).toBe(false);
     expect(applyGitignoreRules('notlogs/file', rules, true).excluded).toBe(false);
-  });
+    expect(applyGitignoreRules('.metadata', rules, true).excluded).toBe(true); // Match dotfile exactly
+});
 
   // --- Standard Ignores (.git) ---
   it('should always ignore .git directory and its contents', () => {
@@ -65,7 +76,16 @@ describe('applyGitignoreRules', () => {
     // If stricter root matching is needed, the pattern transformation in gitignoreFilter.ts needs adjustment.
     expect(applyGitignoreRules('src/config.yaml', rootRules, true).excluded).toBe(false); // Should NOT match according to gitignore / rules
 
-    expect(applyGitignoreRules('dist/file.js', rootRules, true).excluded).toBe(true); // Matches dist/
+    // Rule '/data/' -> patterns 'data', 'data/**'
+    expect(applyGitignoreRules('data/file.txt', rootRules, true).excluded).toBe(true);
+    expect(applyGitignoreRules('data/', rootRules, true).excluded).toBe(true);
+    expect(applyGitignoreRules('src/data/file.txt', rootRules, true).excluded).toBe(false);
+
+    // Rule 'dist/' -> patterns 'dist', 'dist/**' (matches anywhere if no leading slash)
+    // But rootRules has it, so it should match only 'dist/' at root?
+    // Let's re-test the rule `dist/` when added without the leading slash
+    const nonRootDistRule = ['dist/'];
+    expect(applyGitignoreRules('dist/file.js', nonRootDistRule, true).excluded).toBe(true);
   });
 
   // --- Edge Cases ---

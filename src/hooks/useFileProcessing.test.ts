@@ -5,35 +5,40 @@ import { AppConfig, AnalysisResult, ProcessedData, ProcessableFile } from '../ty
 
 // --- Mocking useWorkerManager ---
 // Store mock functions globally in the test file scope
-let mockPostTask: ReturnType<typeof vi.fn>;
-let mockOnMessage: ReturnType<typeof vi.fn>;
-let mockOnError: ReturnType<typeof vi.fn>;
-let mockIsWorkerReady: boolean;
-let workerMessageHandlers: Map<string, (payload: any) => void>;
-let workerErrorHandlers: Set<(error: string) => void>;
+const mockPostTask = vi.fn();
+const workerMessageHandlers = new Map<string, (payload: any) => void>();
+const workerErrorHandlers = new Set<(error: string) => void>();
+
+const mockOnMessage = vi.fn((type: string, handler: (payload: any) => void) => {
+  workerMessageHandlers.set(type, handler);
+  return () => workerMessageHandlers.delete(type);
+});
+
+const mockOnError = vi.fn((handler: (error: string) => void) => {
+  workerErrorHandlers.add(handler);
+  return () => workerErrorHandlers.delete(handler);
+});
+
+let mockIsWorkerReady = true;
 
 vi.mock('./useWorkerManager', () => {
-  // Initialize mocks within the factory function
-  mockPostTask = vi.fn();
-  mockOnMessage = vi.fn((type, handler) => {
-    workerMessageHandlers.set(type, handler);
-    // Return cleanup function
-    return () => workerMessageHandlers.delete(type);
-  });
-  mockOnError = vi.fn((handler) => {
-    workerErrorHandlers.add(handler);
-    // Return cleanup function
-    return () => workerErrorHandlers.delete(handler);
-  });
-
   return {
     useWorkerManager: () => ({
       postTask: mockPostTask,
       onMessage: mockOnMessage,
       onError: mockOnError,
-      isWorkerReady: mockIsWorkerReady, // Use the global variable
-      workerError: null, // Keep it simple for now, can be made dynamic if needed
+      isWorkerReady: mockIsWorkerReady,
+      workerError: null,
     }),
+    // Expose the mocks if needed by tests
+    __mocks__: {
+      mockPostTask,
+      mockOnMessage,
+      mockOnError,
+      workerMessageHandlers,
+      workerErrorHandlers,
+      mockIsWorkerReady,
+    },
   };
 });
 
@@ -91,9 +96,9 @@ describe('useFileProcessing Hook', () => {
     mockPostTask.mockClear();
     mockOnMessage.mockClear();
     mockOnError.mockClear();
-    workerMessageHandlers = new Map();
-    workerErrorHandlers = new Set();
-    mockIsWorkerReady = true; // Assume worker is ready by default
+    workerMessageHandlers.clear();
+    workerErrorHandlers.clear();
+    // mockIsWorkerReady = true; // Assume worker is ready by default
 
     initialConfig = {
       useGitignore: true,

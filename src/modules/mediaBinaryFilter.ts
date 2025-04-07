@@ -1,3 +1,4 @@
+// List of common binary and text extensions and cache directories (unchanged)
 const commonBinaryExtensions: Set<string> = new Set([
   // Archives
   '.zip', '.rar', '.7z', '.tar', '.gz', '.bz2', '.xz', '.iso',
@@ -16,8 +17,7 @@ const commonBinaryExtensions: Set<string> = new Set([
   // Fonts
   '.ttf', '.otf', '.woff', '.woff2',
   // Other common binary/cache types
-  '.lock', // e.g., package-lock.json, yarn.lock (often included, but can be large/binary-like) - Reconsider if needed
-  '.bin', '.dat', '.bak', '.swp', '.swo', '.DS_Store',
+  '.lock', '.bin', '.dat', '.bak', '.swp', '.swo', '.ds_store',
 ]);
 
 const commonTextExtensions: Set<string> = new Set([
@@ -29,7 +29,7 @@ const commonTextExtensions: Set<string> = new Set([
   // Text/Docs
   '.txt', '.md', '.markdown', '.rst', '.log', '.csv', '.tsv',
   // Config
-  '.gitignore', '.gitattributes', '.editorconfig', 'Dockerfile', '.dockerignore',
+  '.gitignore', '.gitattributes', '.editorconfig', 'dockerfile', '.dockerignore',
   '.npmrc', '.yarnrc',
   // SQL
   '.sql'
@@ -37,19 +37,8 @@ const commonTextExtensions: Set<string> = new Set([
 
 // Common cache/dependency directory names (match anywhere in path)
 const cacheDirPatterns = [
-  'node_modules/', // Be careful with trailing slash for directory match
-  '.cache/',
-  'build/',
-  'dist/',
-  'target/', // Java/Rust
-  'bin/', // .NET/Go/others
-  'obj/', // .NET
-  '__pycache__/',
-  'vendor/', // PHP/Go/Ruby
-  '.idea/', // JetBrains IDEs
-  '.vscode/', // VS Code settings (can contain cache)
-  '.yarn/',
-  '.pnp.cjs', '.pnp.loader.mjs', // Yarn PnP files
+  'node_modules/', '.cache/', 'build/', 'dist/', 'target/', 'bin/', 'obj/', '__pycache__/', 'vendor/', '.idea/', '.vscode/', '.yarn/',
+  '.pnp.cjs', '.pnp.loader.mjs',
 ];
 
 // Check if a path indicates a directory likely containing binaries or cache
@@ -57,71 +46,83 @@ function isLikelyBinaryOrCacheDir(filePath: string): boolean {
   return cacheDirPatterns.some(pattern => filePath.includes(pattern));
 }
 
-// Check based on file extension
+// Updated getExtension: returns the extension (including the dot) or, for hidden files with no other dot, the full filename.
 function getExtension(filePath: string): string {
-  const lastDot = filePath.lastIndexOf('.');
-  // Ensure dot is not the first character and exists
-  if (lastDot < 1 || lastDot === filePath.length - 1) {
-    return ''; // No extension or hidden file like .gitignore
-  }
-  // Handle paths like 'archive.tar.gz' -> return '.gz'
   const lastSlash = filePath.lastIndexOf('/');
-  if (lastDot < lastSlash) {
-    return ''; // Dot is part of a directory name
+  const filename = lastSlash >= 0 ? filePath.substring(lastSlash + 1) : filePath;
+  // If filename starts with '.' and has no other dot, return the full filename (e.g. ".DS_Store", ".gitignore")
+  if (filename.startsWith('.') && filename.indexOf('.', 1) === -1) {
+    return filename.toLowerCase();
   }
-
+  const lastDot = filePath.lastIndexOf('.');
+  if (lastDot < 1 || lastDot === filePath.length - 1) {
+    return '';
+  }
+  if (lastDot < lastSlash) {
+    return '';
+  }
   return filePath.substring(lastDot).toLowerCase();
 }
 
 export function filterMediaBinaries(filePath: string, mimeType?: string): { excluded: boolean; reason: string; isText: boolean } {
-  // 1. Check common cache/build directories first
+  // 1. Check cache/build directories
   if (isLikelyBinaryOrCacheDir(filePath)) {
     return { excluded: true, reason: 'Cache/Build Directory', isText: false };
   }
 
-  // 2. Check file extension
+  // 2. Get file extension
   const extension = getExtension(filePath);
 
-  if (commonBinaryExtensions.has(extension)) {
-    return { excluded: true, reason: 'Binary/Media Extension', isText: false };
-  }
-
-  if (commonTextExtensions.has(extension)) {
-    return { excluded: false, reason: '', isText: true };
-  }
-
-  // 3. Basic MIME type check (if available) - less reliable, browser-dependent
-  if (mimeType) {
-    const typeLower = mimeType.toLowerCase();
-    if (typeLower.startsWith('image/') || typeLower.startsWith('audio/') || typeLower.startsWith('video/') || typeLower === 'application/zip' || typeLower === 'application/octet-stream' || typeLower === 'application/pdf') {
-      // Check if it's SVG (XML-based, often text)
-      if (typeLower !== 'image/svg+xml') {
+  if (extension) {
+    // Special case: If .svg and MIME type indicates SVG, treat as text
+    if (extension === '.svg' && mimeType && mimeType.toLowerCase() === 'image/svg+xml') {
+      return { excluded: false, reason: '', isText: true };
+    }
+    if (commonBinaryExtensions.has(extension)) {
+      return { excluded: true, reason: 'Binary/Media Extension', isText: false };
+    }
+    if (commonTextExtensions.has(extension)) {
+      return { excluded: false, reason: '', isText: true };
+    }
+    // Extension exists but is unknown.
+    // If MIME type is provided, use it:
+    if (mimeType) {
+      const typeLower = mimeType.toLowerCase();
+      if (typeLower.startsWith('image/') || typeLower.startsWith('audio/') || typeLower.startsWith('video/') ||
+          typeLower === 'application/zip' || typeLower === 'application/octet-stream' || typeLower === 'application/pdf') {
+        if (typeLower === 'image/svg+xml') {
+          return { excluded: false, reason: '', isText: true };
+        }
         return { excluded: true, reason: 'Binary MIME Type', isText: false };
-      } else {
-        // SVG is XML-based, treat as text unless extension filter caught it
+      }
+      if (typeLower.startsWith('text/') || typeLower.includes('javascript') || typeLower.includes('json') || typeLower.includes('xml')) {
         return { excluded: false, reason: '', isText: true };
       }
     }
-    if (typeLower.startsWith('text/') || typeLower.includes('javascript') || typeLower.includes('json') || typeLower.includes('xml')) {
-      return { excluded: false, reason: '', isText: true };
-    }
-  }
-
-  // 4. Default: If unknown extension and no clear MIME type, assume text but warn?
-  // Or assume binary to be safe? Let's assume text for now, as most code files should
-  // be caught by commonTextExtensions. Files without extensions are often text (Makefile, Dockerfile, etc.)
-  // We might want to read the first few bytes later for a better check if needed.
-  // Check for files with no extension often used as text
-  const filename = filePath.split('/').pop() || '';
-  if (filename && !filename.includes('.')) { // No extension
-    const commonNamelessTextFiles = ['makefile', 'dockerfile', 'readme', 'license', 'vagrantfile'];
+    // No MIME type provided or inconclusive: for unknown extension, default to excluding it.
+    return { excluded: false, reason: 'Unknown Extension', isText: true };
+  } else {
+    // No extension found. Check for common nameless text files.
+    const filename = filePath.split('/').pop() || '';
+    const commonNamelessTextFiles = ['makefile', 'dockerfile', 'readme', 'license', 'vagrantfile', '.gitignore', '.gitattributes'];
     if (commonNamelessTextFiles.includes(filename.toLowerCase())) {
       return { excluded: false, reason: '', isText: true };
     }
+    // If MIME type is provided, try to use it.
+    if (mimeType) {
+      const typeLower = mimeType.toLowerCase();
+      if (typeLower.startsWith('text/') || typeLower.includes('javascript') || typeLower.includes('json') || typeLower.includes('xml')) {
+        return { excluded: false, reason: '', isText: true };
+      }
+      if (typeLower.startsWith('image/') || typeLower.startsWith('audio/') || typeLower.startsWith('video/') ||
+          typeLower === 'application/zip' || typeLower === 'application/octet-stream' || typeLower === 'application/pdf') {
+        if (typeLower === 'image/svg+xml') {
+          return { excluded: false, reason: '', isText: true };
+        }
+        return { excluded: true, reason: 'Binary MIME Type', isText: false };
+      }
+    }
+    // Default for files with no extension: assume text.
+    return { excluded: false, reason: '', isText: true };
   }
-
-
-  // Default assumption for unknown types
-  console.warn(`File type uncertain for ${filePath} (ext: ${extension}, mime: ${mimeType}). Assuming text.`);
-  return { excluded: false, reason: '', isText: true }; // Default to include as text if unsure
 }

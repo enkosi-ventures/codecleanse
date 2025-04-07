@@ -98,9 +98,9 @@ const FileOverridePanel = ({ files, onOverridesChange }: FileOverridePanelProps)
                   <Tooltip title={getFileTooltip(file)} placement="left">
                     <IconButton edge="end" aria-label="toggle inclusion" onClick={() => handleToggle(file.relativePath)}>
                       {userOverride !== undefined ? (
-                        effectiveInclude ? <CheckboxIcon color="primary" /> : <CheckBoxOutlineBlank color="action" />
+                        effectiveInclude ? <CheckboxIcon data-testid="CheckboxIcon" color="primary" /> : <CheckBoxOutlineBlank data-testid="CheckBoxOutlineBlank" color="action" />
                       ) : (
-                        effectiveInclude ? <CheckboxIcon color="success" /> : <CheckBoxOutlineBlank color="disabled" />
+                        effectiveInclude ? <CheckboxIcon data-testid="CheckboxIcon" color="success" /> : <CheckBoxOutlineBlank data-testid="CheckBoxOutlineBlank" color="disabled" />
                       )}
                     </IconButton>
                   </Tooltip>
