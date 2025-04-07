@@ -17,11 +17,32 @@ import AdBanner from './components/AdBanner';
 import { useFileProcessing } from './hooks/useFileProcessing';
 import { useConfiguration } from './hooks/useConfiguration';
 
-import { initGA, trackPageView } from './analytics';
+import { initGA, trackEvent } from './analytics';
 
 
 function App() {
   const { config, updateConfig } = useConfiguration();
+
+  const handleProcessStart = () => {
+    trackEvent({ category: 'Processing', action: 'Start Processing Clicked' });
+    startProcessing();
+  }
+
+  const handleExportZip = () => {
+    trackEvent({ category: 'Export', action: 'Export Clicked', label: 'ZIP' });
+    generateZipExport();
+  }
+
+  const handleExportText = () => {
+    trackEvent({ category: 'Export', action: 'Export Clicked', label: 'Text' });
+    generateTextExport();
+  }
+
+  const handleReset = () => {
+    trackEvent({ category: 'Interaction', action: 'Reset Clicked' });
+    resetState();
+  }
+
   const {
     state,
     error,
@@ -30,9 +51,9 @@ function App() {
     processedData,
     skippedFolderInfo,
     fileInputRef,
-    handleFileChange,
+    handleFileChange: originalHandleFileChange,
     handleDragOver,
-    handleDrop,
+    handleDrop: originalHandleDrop,
     startProcessing,
     generateZipExport,
     generateTextExport,
@@ -40,14 +61,29 @@ function App() {
     updateFileOverrides,
   } = useFileProcessing(config);
 
+
   useEffect(() => {
     initGA();
   }, []);
 
-  useEffect(() => {
-    trackPageView(location.pathname);
+  // Wrap original file handlers to add event tracking on success
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    originalHandleFileChange(event); // Call the original logic first
+    // Track *successful* initiation of analysis (triggered after files are selected)
+    if (event.target.files && event.target.files.length > 0) {
+      trackEvent({ category: 'Upload', action: 'Files Selected', label: 'Browse Button' });
+    }
+  };
 
-  }, [location]);
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    originalHandleDrop(event); // Call the original logic first
+    // Track *successful* initiation of analysis (triggered after drop processing)
+    if (event.dataTransfer.items && event.dataTransfer.items.length > 0) {
+      // Note: We track the *intent* here, success is harder to guarantee from drop
+      trackEvent({ category: 'Upload', action: 'Files Selected', label: 'Drag and Drop' });
+    }
+  };
+
 
   const isLoading = state === 'analyzing' || state === 'processing' || state === 'exporting';
 
@@ -73,7 +109,7 @@ function App() {
         </Alert>
       )}
 
-      {/* Display Skipped Folder Info */}
+      {/* Info Alerts */}
       {skippedMessage && state !== 'idle' && (
         <Alert severity="info" sx={{ mb: 2 }}>
           {skippedMessage}
@@ -91,10 +127,10 @@ function App() {
               onDragOver={handleDragOver}
               onDrop={handleDrop}
               inputRef={fileInputRef}
-              disabled={state !== 'idle' && state !== 'error' && state !== 'ready_for_review'} // Allow upload again when ready for review or error
+              disabled={state !== 'idle' && state !== 'error' && state !== 'ready_for_review'}
             />
-            {/* Configuration Panel Logic */}
-            {(state !== 'idle' || analysisResult) && ( // Show config if not idle or if results exist (even after reset maybe?)
+            {/* ... Configuration Panel ... */}
+            {(state !== 'idle' || analysisResult) && (
               <Box sx={{ mt: 3 }}>
                 <ConfigurationPanel
                   config={config}
@@ -136,15 +172,14 @@ function App() {
           <Paper elevation={2} sx={{ p: 3, height: '100%' }}>
             <Typography variant="h6" gutterBottom>3. Process & Export</Typography>
             <ExportOptions
-              onProcess={startProcessing}
-              onExportZip={generateZipExport}
-              onExportText={generateTextExport}
-              onReset={resetState}
+              onProcess={handleProcessStart}
+              onExportZip={handleExportZip}
+              onExportText={handleExportText}
+              onReset={handleReset}
               currentState={state}
               isLoading={isLoading}
-              // Enable process if ready for review *and* there are files remaining after potential filtering
-              hasFiles={!!analysisResult && analysisResult.totalFiles > 0} // Use totalFiles from analysis to reflect *attempted* upload
-              canProcessOverride={state === 'ready_for_review' && !!analysisResult && analysisResult.files.length > 0} // Check if files *remain* for processing
+              hasFiles={!!analysisResult && analysisResult.totalFiles > 0}
+              canProcessOverride={state === 'ready_for_review' && !!analysisResult && analysisResult.files.length > 0}
               hasProcessedData={!!processedData}
             />
           </Paper>
