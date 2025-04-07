@@ -3,7 +3,7 @@ import { WorkerTask, WorkerMessage } from '../types';
 
 // `?worker&inline` tells Vite to bundle the worker code.
 // `&inline` embeds the worker code as a string, avoiding separate file issues on some hosts.
-import ProcessorWorker from '../workers/processor.worker.ts?worker&inline';
+import ProcessorWorker from '../workers/processor.worker.ts?worker';
 
 export function useWorkerManager() {
   const workerRef = useRef<Worker | null>(null);
