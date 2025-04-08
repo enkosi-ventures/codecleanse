@@ -1,5 +1,6 @@
 # CodeCleanse ✨🧹
 
+[![Current Version](https://img.shields.io/github/package-json/v/enkosi-ventures/codecleanse)](./package.json) 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/enkosi-ventures/codecleanse/ci.yml?branch=main)](https://github.com/enkosi-ventures/codecleanse/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 <a href="https://www.buymeacoffee.com/enkosi" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px !important;width: 150px !important;" ></a>
