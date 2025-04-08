@@ -18,7 +18,7 @@ const ConfigurationPanel = ({ config, onConfigChange, disabled }: ConfigurationP
   };
 
   const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-     onConfigChange({ [event.target.name]: event.target.value });
+    onConfigChange({ [event.target.name]: event.target.value });
   }
 
   return (
@@ -49,19 +49,18 @@ const ConfigurationPanel = ({ config, onConfigChange, disabled }: ConfigurationP
         sx={{ display: 'block' }}
       /> */}
       <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>Sensitive Data:</Typography>
-        <TextField
-            label="Redaction Placeholder"
-            name="redactionPlaceholder"
-            value={config.redactionPlaceholder}
-            onChange={handleTextChange}
-            variant="outlined"
-            size="small"
-            fullWidth
-            disabled={disabled}
-            margin="dense"
-            helperText="Text used to replace detected sensitive data."
-        />
-       {/* Add more options here later (e.g., custom regex patterns) */}
+      <TextField
+        label="Redaction Placeholder"
+        name="redactionPlaceholder"
+        value={config.redactionPlaceholder}
+        onChange={handleTextChange}
+        variant="outlined"
+        size="small"
+        fullWidth
+        disabled={disabled}
+        margin="dense"
+        helperText="Text used to replace detected sensitive data."
+      />
     </Box>
   );
 };

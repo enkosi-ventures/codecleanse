@@ -3,12 +3,15 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+const appVersion = process.env.npm_package_version || '0.0.0';
+
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
 
   // Base define configuration (applies always)
   const defineConf: Record<string, any> = {
     'process.env.NODE_ENV': JSON.stringify(mode),
+    '__APP_VERSION__': JSON.stringify(appVersion),
   };
 
   // Specific defines ONLY for production build

@@ -7,6 +7,7 @@ import {
 } from '../types';
 import { useWorkerManager } from './useWorkerManager';
 
+
 // --- Constants for Pre-filtering ---
 // Folder names (relative to the uploaded root's children) to completely skip during upload.
 const PRE_FILTER_FOLDERS: ReadonlySet<string> = new Set(['node_modules', '.git']);
@@ -28,7 +29,10 @@ const downloadBlob = (blob: Blob, filename: string) => {
 // Example: `project-root/node_modules/file.js` -> should return true
 // Example: `project-root/.git/config` -> should return true
 // Example: `project-root/src/index.js` -> should return false
-function shouldPreFilter(relativePath: string | undefined | null): { preFiltered: boolean; folderName: string | null } {
+function shouldPreFilter(
+  relativePath: string | undefined | null,
+  userExclusions: Set<string>
+): { preFiltered: boolean; folderName: string | null } {
   if (!relativePath) {
     return { preFiltered: false, folderName: null };
   }
@@ -37,7 +41,7 @@ function shouldPreFilter(relativePath: string | undefined | null): { preFiltered
   const segments = pathParts.length > 1 ? pathParts.slice(1) : pathParts; // Skip the root dir name itself
 
   for (const segment of segments) {
-    if (PRE_FILTER_FOLDERS.has(segment)) {
+    if (PRE_FILTER_FOLDERS.has(segment) || userExclusions.has(segment)) {
       // Return the specific folder name that caused the filter
       return { preFiltered: true, folderName: segment };
     }
@@ -59,6 +63,7 @@ export function useFileProcessing(config: AppConfig) {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { postTask, onMessage, onError, isWorkerReady, workerError } = useWorkerManager();
+
 
   // --- Worker Message Handlers ---
 
@@ -156,8 +161,9 @@ export function useFileProcessing(config: AppConfig) {
       // --- Pre-filter Files ---
       let skippedCount = 0;
       const skippedNames = new Set<string>();
+      const userExclusionSet = new Set(config.userPreFilterFolders);
       const filesToAnalyze = allFilesList.filter(file => {
-        const { preFiltered, folderName } = shouldPreFilter(file.webkitRelativePath);
+        const { preFiltered, folderName } = shouldPreFilter(file.webkitRelativePath, userExclusionSet);
         if (preFiltered && folderName) {
           skippedCount++;
           skippedNames.add(folderName);
@@ -213,12 +219,13 @@ export function useFileProcessing(config: AppConfig) {
     const skippedNames = new Set<string>();
 
     if (items && items.length > 0) {
+      const userExclusionSet = new Set(config.userPreFilterFolders);
       const traverseFileTree = (item: FileSystemEntry, path = ''): Promise<void> => {
         return new Promise((resolve, reject) => {
           const currentPath = path ? `${path}/${item.name}` : item.name;
 
           // --- Pre-filter Check during Traversal ---
-          const { preFiltered, folderName } = shouldPreFilter(currentPath);
+          const { preFiltered, folderName } = shouldPreFilter(currentPath, userExclusionSet);
           if (preFiltered && folderName) {
             console.log(`Skipping traversal into pre-filtered path: ${currentPath}`);
             skippedNames.add(folderName); // Track skipped root folder

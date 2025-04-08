@@ -43,7 +43,7 @@ export interface AppConfig {
   useGitignore: boolean;
   // removeBinariesMedia: boolean; // Consider adding if needed as separate toggle
   redactionPlaceholder: string;
-  // Add more config options: custom patterns, etc.
+  userPreFilterFolders: string[];
 }
 
 // --- Web Worker Communication Types ---

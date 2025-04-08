@@ -3,10 +3,7 @@ import { filterMediaBinaries } from './mediaBinaryFilter';
 import { scanAndRedact } from './sensitiveScanner';
 import { generateZip, generateConcatenatedText } from './exportEngine';
 import { ProcessableFile, AnalysisResult, ProcessedData, AppConfig, WorkerMessage } from '../types';
-
-// --- Constants ---
-const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB limit for reading content initially (adjust as needed)
-const MAX_TOTAL_SIZE_BYTES = 100 * 1024 * 1024; // 100MB overall limit (adjust as needed)
+import { MAX_FILE_SIZE_BYTES, MAX_TOTAL_SIZE_BYTES, EXPORT_ZIP_FILENAME, EXPORT_TEXT_FILENAME } from '../constants';
 
 
 // --- Helper Functions ---
@@ -213,12 +210,12 @@ export async function createZipArchive(processedData: ProcessedData): Promise<{ 
   console.log("Worker: Generating Zip archive...");
   const blob = await generateZip(processedData.filesToExport);
   console.log("Worker: Zip archive generated.");
-  return { blob, filename: 'codecleanse_export.zip' };
+  return { blob, filename: EXPORT_ZIP_FILENAME };
 }
 
 export function createConcatenatedDocument(processedData: ProcessedData): { blob: Blob, filename: string } {
   console.log("Worker: Generating concatenated text document...");
   const blob = generateConcatenatedText(processedData.filesToExport);
   console.log("Worker: Concatenated text document generated.");
-  return { blob, filename: 'codecleanse_export.txt' };
+  return { blob, filename: EXPORT_TEXT_FILENAME };
 }

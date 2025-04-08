@@ -1,8 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { scanAndRedact } from './sensitiveScanner';
+import { DEFAULT_REDACTION_PLACEHOLDER } from '../constants';
 
 describe('scanAndRedact', () => {
-  const placeholder = '[REDACTED]';
+  const placeholder = DEFAULT_REDACTION_PLACEHOLDER;
 
   it('should redact AWS Access Key ID', () => {
     const content = 'key: AKIAIOSFODNN7EXAMPLE';
