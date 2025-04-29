@@ -16,7 +16,7 @@ import FileUploader from './components/FileUploader';
 import AnalysisDashboard from './components/AnalysisDashboard';
 import PreUploadConfig from './components/PreUploadConfig';
 import ConfigurationPanel from './components/ConfigurationPanel';
-import FileOverridePanel from './components/FileOverridePanel';
+import FileOverridePanel from './components/review/FileOverridePanel';
 import ProgressIndicator from './components/ProgressIndicator';
 import ExportOptions from './components/ExportOptions';
 import AdBanner from './components/AdBanner';

@@ -17,6 +17,8 @@ export default defineConfig(({ mode }) => {
   // Specific defines ONLY for production build
   if (mode === 'production') {
     defineConf['process.platform'] = JSON.stringify('browser');
+    defineConf['process.version'] = JSON.stringify('');
+    defineConf['process.nextTick'] = 'undefined'; // Or the setTimeout 
   }
 
   return {

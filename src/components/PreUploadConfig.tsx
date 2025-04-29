@@ -61,17 +61,20 @@ const PreUploadConfig: React.FC<PreUploadConfigProps> = ({
         disabled={disabled}
         size="small"
         renderTags={(value, getTagProps) =>
-          value.map((option, index) => (
-            // eslint-disable-next-line react/jsx-key
-            <Chip
-              variant="outlined"
-              label={option}
-              size="small"
-              color="primary"
-              {...getTagProps({ index })}
-              disabled={disabled}
-            />
-          ))
+          value.map((option, index) => {
+            const { key, ...otherTagProps } = getTagProps({ index });
+            return (
+              <Chip
+                key={key}
+                variant="outlined"
+                label={option}
+                size="small"
+                color="primary"
+                {...otherTagProps}
+                disabled={disabled}
+              />
+            );
+          })
         }
         renderInput={(params) => (
           <TextField

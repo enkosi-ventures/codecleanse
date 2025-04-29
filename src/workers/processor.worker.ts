@@ -1,5 +1,16 @@
 /// <reference lib="webworker" />
 
+if (typeof process === 'undefined') {
+  (globalThis as any).process = {
+    env: { NODE_ENV: 'development' }, // Provide NODE_ENV
+    version: '', // Provide empty version
+    platform: 'browser', // Provide dummy platform
+    nextTick: (callback: () => void) => setTimeout(callback, 0), // Basic nextTick
+    // Add other properties if needed by dependencies
+  };
+  console.log('Polyfilled process object for worker development mode.');
+}
+
 import { analyzeFiles, processFiles, createZipArchive, createConcatenatedDocument } from '../modules/fileProcessing';
 import { WorkerTask, WorkerMessage } from '../types';
 
