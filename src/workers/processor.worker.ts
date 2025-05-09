@@ -1,6 +1,7 @@
 /// <reference lib="webworker" />
 
 if (typeof process === 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
   (globalThis as any).process = {
     env: { NODE_ENV: 'development' }, // Provide NODE_ENV
     version: '', // Provide empty version

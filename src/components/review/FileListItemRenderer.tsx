@@ -85,5 +85,6 @@ const FileListItemRenderer: React.FC<FileListItemRendererProps> = React.memo(({
     </ListItem>
   );
 }); // Use React.memo for performance if list items rarely change props
+FileListItemRenderer.displayName = 'FileListItemRenderer';
 
 export default FileListItemRenderer;

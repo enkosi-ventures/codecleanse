@@ -98,7 +98,7 @@ const FileOverridePanel: React.FC<FileOverridePanelProps> = ({ files, onOverride
         // Simplified: If overridden, next is undefined. If not overridden, next is !originalInclude.
         const nextOverride = currentOverride === undefined ? !file.include : undefined;
         updateAndNotify({ ...localOverrides, [path]: nextOverride });
-    }, [files, localOverrides, updateAndNotify, getEffectiveInclusion]); // Add getEffectiveInclusion
+    }, [files, localOverrides, updateAndNotify]);
 
     const handleSelectAll = useCallback(() => {
         const newOverrides: Record<string, boolean | undefined> = {};
@@ -127,7 +127,7 @@ const FileOverridePanel: React.FC<FileOverridePanelProps> = ({ files, onOverride
     }, [filteredAndGroupedFiles, localOverrides, updateAndNotify]);
 
     // Memoize preview handler
-    const handlePreviewClick = useCallback(async (file: ProcessableFile) => {
+    const handlePreviewClick = useCallback((file: ProcessableFile) => {
         if (!file?.file) return;
         setPreviewFile({ path: file.relativePath, content: null, isLoading: true, error: null });
         setIsPreviewOpen(true);

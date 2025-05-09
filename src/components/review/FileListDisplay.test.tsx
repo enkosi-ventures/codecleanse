@@ -4,8 +4,20 @@ import FileListDisplay from './FileListDisplay';
 import { ProcessableFile } from '../../types';
 import { createMockFile } from '../../utils/testing';
 
+
+interface MockFileListItemRendererProps {
+  file: ProcessableFile;
+  isIncluded: boolean;
+  isOverridden: boolean;
+}
+
+interface GroupedFiles {
+  [directory: string]: ProcessableFile[];
+}
+
+
 vi.mock('./FileListItemRenderer', () => ({
-  default: ({ file, isIncluded, isOverridden }: any) => (
+  default: ({ file, isIncluded, isOverridden }: MockFileListItemRendererProps) => (
     <li data-testid={`file-item-${file.relativePath}`}>
       <span>{file.relativePath.split('/').pop()}</span>
       <span>{isIncluded ? 'Included' : 'Excluded'}</span>
@@ -21,7 +33,7 @@ describe('<FileListDisplay />', () => {
   let mockGetFileTooltip: ReturnType<typeof vi.fn>;
   let mockOnToggle: ReturnType<typeof vi.fn>;
   let mockOnPreview: ReturnType<typeof vi.fn>;
-  let groupedFiles: any; // Simplified type for test
+  let groupedFiles: GroupedFiles; // Simplified type for test
   let sortedDirs: string[];
 
   beforeEach(() => {
@@ -39,13 +51,17 @@ describe('<FileListDisplay />', () => {
     };
     sortedDirs = ['/', 'config', 'src']; // Example sorted order
 
-    mockGetEffectiveInclusion = vi.fn((file) => file.include); // Simple mock
+    mockGetEffectiveInclusion = vi.fn((file: ProcessableFile) => file.include); // Simple mock
     mockGetFileTooltip = vi.fn(() => 'Mock Tooltip');
     mockOnToggle = vi.fn();
     mockOnPreview = vi.fn();
   });
 
-  const renderDisplay = (gFiles = groupedFiles, dirs = sortedDirs, overrides = {}) => {
+  const renderDisplay = (
+    gFiles: GroupedFiles = groupedFiles,
+    dirs: string[] = sortedDirs,
+    overrides: Record<string, boolean | undefined> = {},
+  ) => {
     return render(
       <FileListDisplay
         groupedFiles={gFiles}

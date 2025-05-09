@@ -6,11 +6,19 @@ import FileOverridePanel from './FileOverridePanel';
 import { ProcessableFile } from '../../types';
 import { getFilename, createMockFile } from '../../utils/testing';
 
+interface MockFilePreviewModalProps {
+  open: boolean;
+  onClose: () => void;
+  filePath: string | null;
+  isLoading: boolean;
+  error: string | null;
+  content: string | null;
+}
 
 // Mock the FilePreviewModal to avoid complexities of its internal rendering/PrismJS
 vi.mock('./FilePreviewModal', () => ({
   // Provide a simple functional component mock
-  default: ({ open, onClose, filePath, isLoading, error, content }: any) => {
+  default: ({ open, onClose, filePath, isLoading, error, content }: MockFilePreviewModalProps) => {
     if (!open) return null;
     return (
       <div data-testid="mock-preview-modal" role="dialog">
@@ -42,7 +50,9 @@ describe('<FileOverridePanel /> Integration Tests', () => {
 
   const mockFileReader = {
     readAsText: vi.fn(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onload: vi.fn() as ((this: FileReader, ev: ProgressEvent<FileReader>) => any) | null, // Add type hint
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onerror: vi.fn() as ((this: FileReader, ev: ProgressEvent<FileReader>) => any) | null, // Add type hint & assign mock
     result: 'mock file content' as string | ArrayBuffer | null,
     error: null as DOMException | null,

@@ -2,7 +2,7 @@ import React from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, CircularProgress, Alert
 } from '@mui/material';
-// @ts-expect-error
+// @ts-expect-error - PrismJS might not have perfect types for all dynamic language loading scenarios
 import { highlight, languages } from 'prismjs/components/prism-core'; // Lightweight core
 import 'prismjs/components/prism-clike'; // Base C-like languages
 import 'prismjs/components/prism-javascript'; // Add JS
@@ -53,19 +53,23 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
   open, onClose, filePath, content, isLoading, error
 }) => {
 
-  const highlightedCode = React.useMemo(() => {
+  const highlightedCode = React.useMemo((): string => {
     if (!content || !filePath || isLoading || error) return '';
     const language = getLanguage(filePath);
     try {
       // Check if language is loaded before highlighting
-      if (languages[language]) {
-        return highlight(content, languages[language], language);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const prismLanguages = languages as Record<string, any>;
+      if (prismLanguages[language]) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        return highlight(content, prismLanguages[language], language) as string;
       } else {
         console.warn(`Prism language '${language}' not loaded, falling back.`);
         // Fallback to plain text or clike if language component missing
-        return highlight(content, languages.clike, 'clike');
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        return highlight(content, prismLanguages.clike || prismLanguages.markup, 'clike') as string;
       }
-    } catch (e) {
+    } catch (e: unknown) {
       console.error("Syntax highlighting error:", e);
       return content; // Fallback to plain text on error
     }
